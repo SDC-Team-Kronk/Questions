@@ -1,0 +1,28 @@
+{
+  "name": "sdc-questions",
+  "version": "1.0.0",
+  "description": "SDC Questions Module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SDC-Team-Kronk/Questions.git"
+  },
+  "author": "Dye",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SDC-Team-Kronk/Questions/issues"
+  },
+  "homepage": "https://github.com/SDC-Team-Kronk/Questions#readme",
+  "dependencies": {
+    "eslint": "^7.32.0",
+    "express": "^4.17.1",
+    "mongodb": "^4.1.0",
+    "mongoose": "^5.13.6"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb": "^18.2.1"
+  }
+}
