@@ -1,16 +1,20 @@
+/* eslint-disable no-console */
 const express = require('express');
 // import database methods used for queries here
 const {
-  getQuestions, getAnswers, postQuestion, postAnswer,
+  getQuestions, getAnswers, postQuestion, postAnswer, getIdCounter,
+  markQuestionAsHelpful, markAnswerAsHelpful, reportQuestion, reportAnswer,
+  updateIdCounter,
 } = require('../db/index');
 
 const app = express();
 const port = 3030;
-// const path = require('path');
+app.use(express.json());
 
 // get questions for a product
-app.get('/qa/:product_id', (req, res) => {
-  getQuestions(req.params.product_id, (err, data) => {
+app.get('/qa/:productId', (req, res) => {
+  const start = Date.now();
+  getQuestions(req.params.productId, start, (err, data) => {
     if (err) {
       res.status(400).send(`error getting questions: ${err}`);
     } else {
@@ -21,10 +25,12 @@ app.get('/qa/:product_id', (req, res) => {
 
 // get answers to a question
 app.get('/qa/:question_id/answers', (req, res) => {
-  getAnswers(req.params.question_id, (err, data) => {
+  const start = Date.now();
+  getAnswers(req.params.question_id, start, (err, data) => {
     if (err) {
       res.status(400).send(`error getting answers: ${err}`);
     } else {
+      // get photos?
       res.status(200).send(data);
     }
   });
@@ -32,18 +38,37 @@ app.get('/qa/:question_id/answers', (req, res) => {
 
 // post a question for a product
 app.post('/qa/:product_id', (req, res) => {
-  const { body, name, email } = req;
-  const queryInfo = {
-    product_id: req.params.product_id,
-    body,
-    name,
-    email,
-  };
-  postQuestion(queryInfo, (err) => {
+  // get id counter and update
+  let id = 0;
+  getIdCounter('questionsCount', (err, count) => {
     if (err) {
-      res.status(400).send(`error posting question: ${err}`);
+      console.log(err);
     } else {
-      res.send(201).send('CREATED');
+      console.log('id incremented');
+      id = count + 1;
+      updateIdCounter('questionsCount', id, (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('count updated');
+          console.log(id);
+          const { body, name, email } = req.body;
+          const postInfo = {
+            productId: req.params.product_id,
+            id,
+            body,
+            name,
+            email,
+          };
+          postQuestion(postInfo, (err) => {
+            if (err) {
+              res.status(400).send(`error posting question: ${err}`);
+            } else {
+              res.status(201).send('CREATED');
+            }
+          });
+        }
+      });
     }
   });
 });
@@ -72,23 +97,45 @@ app.post('/qa/:question_id/answers', (req, res) => {
 // mark a question as helpful
 app.put('/qa/question/:question_id/helpful', (req, res) => {
   markQuestionAsHelpful(req.params.question_id, (err) => {
-    
+    if (err) {
+      res.status(400).send(`error marking helpful question: ${err}`);
+    } else {
+      res.status(204).send('success!');
+    }
   });
 });
 
 // report a question
 app.put('/qa/question/:question_id/report', (req, res) => {
-
+  reportQuestion(req.params.question_id, (err) => {
+    if (err) {
+      res.status(400).send(`error reporting question: ${err}`);
+    } else {
+      res.status(204).send('success!');
+    }
+  });
 });
 
 // mark an answer as helpful
-app.put('/qa/answer/:question_id/helpful', (req, res) => {
-
+app.put('/qa/answer/:answer_id/helpful', (req, res) => {
+  markAnswerAsHelpful(req.params.answer_id, (err) => {
+    if (err) {
+      res.status(400).send(`error marking helpful answer: ${err}`);
+    } else {
+      res.status(204).send('success!');
+    }
+  });
 });
 
 // report an answer
-app.get('/qa/answer/:question_id/report', (req, res) => {
-
+app.put('/qa/answer/:answer_id/report', (req, res) => {
+  reportAnswer(req.params.answer_id, (err) => {
+    if (err) {
+      res.status(400).send(`error reporting answer: ${err}`);
+    } else {
+      res.status(204).send('success!');
+    }
+  });
 });
 
 app.listen(port, () => {

@@ -23,6 +23,7 @@
     "mongodb": "^4.1.0"
   },
   "devDependencies": {
-    "eslint-config-airbnb": "^18.2.1"
+    "eslint-config-airbnb": "^18.2.1",
+    "mongoose": "^5.13.7"
   }
 }
