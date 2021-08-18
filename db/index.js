@@ -59,8 +59,8 @@ async function getIdCounter(idField, callback) {
 }
 
 // INCREMENT ID COUNT
-async function updateIdCounter(idField, newCount, callback) {
-  await Counter.updateOne({ name: idField }, { count: newCount }, (err) => {
+async function updateIdCounter(idField, callback) {
+  await Counter.updateOne({ name: idField }, { $inc: { count: +1 } }, (err) => {
     if (err) {
       callback(err);
     } else {
@@ -99,7 +99,6 @@ async function getPhotos(answerId, callback) {
       if (err) {
         callback(err, null);
       } else {
-        console.log(`photos! ${docs}`);
         callback(null, docs);
       }
     });
@@ -121,7 +120,7 @@ async function getAnswers(questionId, start, callback) {
             body: doc.body,
             date,
             answerer_name: doc.answerer_name,
-            photos: [], // PHOTOS DO NOT POPULATE
+            photos: doc.photos,
           });
         });
         callback(null, answers);
@@ -146,7 +145,7 @@ async function postQuestion(postInfo, callback) {
     body,
     asker_name: name,
     asker_email: email,
-    helpful: 0,
+    helpful: Math.floor((Math.random() * 10)) + 1,
     reported: false,
   }, (err) => {
     if (err) {
@@ -160,37 +159,83 @@ async function postQuestion(postInfo, callback) {
 }
 
 // POST AN ANSWER
-async function postAnswer(queryInfo, callback) {
-  await client.connect();
-
-  callback(null);
-
-  // define database query here
+async function postAnswer(postInfo, callback) {
+  const {
+    id,
+    questionId,
+    body,
+    name,
+    email,
+    photos,
+  } = postInfo;
+  console.log(`db: ${questionId}`);
+  await Answer.create({
+    id,
+    question_id: questionId,
+    body,
+    date_written: Date.now(),
+    answerer_name: name,
+    answerer_email: email,
+    reported: false,
+    helpful: Math.floor((Math.random() * 10)) + 1,
+    photos,
+  }, (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
 }
 
 // MARK QUESTION HELPFUL
 async function markQuestionAsHelpful(questionId, callback) {
-
+  await Question.updateOne({ id: questionId }, { $inc: { helpful: +1 } }, (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
 }
 
 // REPORT QUESTION
 async function reportQuestion(questionId, callback) {
-
+  await Question.updateOne({ id: questionId }, { reported: true }, (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
 }
 
 // MARK ANSWER AS HELPFUL
 async function markAnswerAsHelpful(answerId, callback) {
-
+  await Answer.updateOne({ id: answerId }, { $inc: { helpful: +1 } }, (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
 }
 
 // REPORT ANSWER
 async function reportAnswer(answerId, callback) {
-
+  await Answer.updateOne({ id: answerId }, { reported: true }, (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null);
+    }
+  });
 }
 
 // export database methods
 module.exports.getQuestions = getQuestions;
 module.exports.getAnswers = getAnswers;
+module.exports.getPhotos = getPhotos;
 module.exports.postQuestion = postQuestion;
 module.exports.postAnswer = postAnswer;
 module.exports.markQuestionAsHelpful = markQuestionAsHelpful;

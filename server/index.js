@@ -1,24 +1,26 @@
 /* eslint-disable no-console */
 const express = require('express');
+const cors = require('cors');
 // import database methods used for queries here
 const {
   getQuestions, getAnswers, postQuestion, postAnswer, getIdCounter,
   markQuestionAsHelpful, markAnswerAsHelpful, reportQuestion, reportAnswer,
-  updateIdCounter,
+  updateIdCounter, getPhotos,
 } = require('../db/index');
 
 const app = express();
 const port = 3030;
 app.use(express.json());
+app.use(cors());
 
 // get questions for a product
 app.get('/qa/:productId', (req, res) => {
   const start = Date.now();
-  getQuestions(req.params.productId, start, (err, data) => {
+  getQuestions(req.params.productId, start, (err, questions) => {
     if (err) {
       res.status(400).send(`error getting questions: ${err}`);
     } else {
-      res.status(200).send(data);
+      res.status(200).send(questions);
     }
   });
 });
@@ -26,12 +28,11 @@ app.get('/qa/:productId', (req, res) => {
 // get answers to a question
 app.get('/qa/:question_id/answers', (req, res) => {
   const start = Date.now();
-  getAnswers(req.params.question_id, start, (err, data) => {
+  getAnswers(req.params.question_id, start, (err, answers) => {
     if (err) {
       res.status(400).send(`error getting answers: ${err}`);
     } else {
-      // get photos?
-      res.status(200).send(data);
+      res.status(200).send(answers);
     }
   });
 });
@@ -44,14 +45,12 @@ app.post('/qa/:product_id', (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      console.log('id incremented');
       id = count + 1;
-      updateIdCounter('questionsCount', id, (err) => {
+      updateIdCounter('questionsCount', (err) => {
         if (err) {
           console.log(err);
         } else {
           console.log('count updated');
-          console.log(id);
           const { body, name, email } = req.body;
           const postInfo = {
             productId: req.params.product_id,
@@ -75,21 +74,38 @@ app.post('/qa/:product_id', (req, res) => {
 
 // post an answer to a question
 app.post('/qa/:question_id/answers', (req, res) => {
-  const {
-    body, name, email, photos,
-  } = req;
-  const queryInfo = {
-    question_id: req.params.question_id,
-    body,
-    name,
-    email,
-    photos,
-  };
-  postAnswer(queryInfo, (err) => {
+  let id = 0;
+  getIdCounter('answersCount', (err, count) => {
     if (err) {
-      res.status(400).send(`error posting answer: ${err}`);
+      console.log(err);
     } else {
-      res.status(201).send('CREATED');
+      id = count + 1;
+      updateIdCounter('answersCount', (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('count updated');
+          const {
+            body, name, email, photos,
+          } = req.body;
+          const postInfo = {
+            id,
+            questionId: req.params.question_id,
+            body,
+            name,
+            email,
+            photos,
+          };
+          console.log(`api: ' ${req.params.question_id}`);
+          postAnswer(postInfo, (err) => {
+            if (err) {
+              res.status(400).send(`error posting answer: ${err}`);
+            } else {
+              res.status(201).send('CREATED');
+            }
+          });
+        }
+      });
     }
   });
 });
