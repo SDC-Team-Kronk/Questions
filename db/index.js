@@ -86,20 +86,7 @@ async function getQuestions(productId, start, callback) {
           });
         });
         callback(null, questions);
-        console.log(Date.now() - start);
-      }
-    });
-}
-
-// GET PHOTOS (VOID FOR NOW)
-async function getPhotos(answerId, callback) {
-  await Photos.find({ answer_id: Number(answerId) })
-    .sort({ answer: 1 })
-    .exec((err, docs) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(null, docs);
+        console.log(`get questions: ${Date.now() - start}`);
       }
     });
 }
@@ -124,7 +111,7 @@ async function getAnswers(questionId, start, callback) {
           });
         });
         callback(null, answers);
-        console.log(Date.now() - start);
+        console.log(`get answers: ${Date.now() - start}`);
       }
     });
 }
@@ -154,8 +141,6 @@ async function postQuestion(postInfo, callback) {
       callback(null);
     }
   });
-
-  // define database query here
 }
 
 // POST AN ANSWER
@@ -235,7 +220,6 @@ async function reportAnswer(answerId, callback) {
 // export database methods
 module.exports.getQuestions = getQuestions;
 module.exports.getAnswers = getAnswers;
-module.exports.getPhotos = getPhotos;
 module.exports.postQuestion = postQuestion;
 module.exports.postAnswer = postAnswer;
 module.exports.markQuestionAsHelpful = markQuestionAsHelpful;

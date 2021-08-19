@@ -5,7 +5,7 @@ const cors = require('cors');
 const {
   getQuestions, getAnswers, postQuestion, postAnswer, getIdCounter,
   markQuestionAsHelpful, markAnswerAsHelpful, reportQuestion, reportAnswer,
-  updateIdCounter, getPhotos,
+  updateIdCounter,
 } = require('../db/index');
 
 const app = express();

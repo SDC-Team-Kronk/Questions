@@ -18,13 +18,15 @@
   },
   "homepage": "https://github.com/SDC-Team-Kronk/Questions#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "eslint": "^7.32.0",
     "express": "^4.17.1",
-    "mongodb": "^4.1.0",
-    "cors": "^2.8.5"
+    "mongodb": "^4.1.0"
   },
   "devDependencies": {
+    "artillery": "^1.7.7",
     "eslint-config-airbnb": "^18.2.1",
+    "jest": "^27.0.6",
     "mongoose": "^5.13.7"
   }
 }

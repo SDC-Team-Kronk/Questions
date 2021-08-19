@@ -1,0 +1,28 @@
+config:
+  target: "http://localhost:3030"
+  phases:
+    - duration: 60
+      arrivalRate: 50
+      name: Warm up
+    - duration: 120
+      arrivalRate: 50
+      rampTo: 250
+      name: Ramp up load
+    - duration: 300
+      arrivalRate: 250
+      name: Sustained load
+  payload:
+    path: "stress_test_numbers.csv"
+    fields:
+        - "numbers"
+
+scenarios:
+  - name: "Get Questions"
+    flow:
+      - get:
+          url: "/qa/{{ numbers }}"
+          # capture:
+          #   - json: "$.data.results[0].question_id"
+          #     as: "questionId"
+      # - get:
+      #     url: "/qa/{{ numbers }}/answers"
